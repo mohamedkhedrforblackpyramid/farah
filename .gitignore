@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+.python_packages/
 
 # Symbolication related
 app.*.symbols
