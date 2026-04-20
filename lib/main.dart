@@ -7,9 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 void main() {
   runApp(const FarahApp());
 }
-git add .github/workflows/deploy_github_pages.yml
-git commit -m "Deploy Flutter web to GitHub Pages"
-git push
+
 class FarahApp extends StatelessWidget {
   const FarahApp({super.key});
 
