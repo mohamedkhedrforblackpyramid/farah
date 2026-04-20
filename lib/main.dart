@@ -1641,7 +1641,7 @@ class _LoveGiftDialogState extends State<_LoveGiftDialog> with TickerProviderSta
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            'بحبك يا فرح',
+                            'بحب كل تفصيله في جمالك',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.cairo(
                               fontSize: 28,
