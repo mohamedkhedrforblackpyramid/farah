@@ -76,6 +76,184 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
+  static const _yesSweetMessage =
+      'After you press Yes, you’re officially allowed to say sweet things to me… no excuses 😌😂';
+
+  Future<void> _showYesSweetPopup() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFFFE8F0),
+                    Color(0xFFFFF5FA),
+                    Color(0xFFFFD6E8),
+                  ],
+                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.95), width: 2.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFE91E63).withValues(alpha: 0.28),
+                    blurRadius: 28,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('💗', style: TextStyle(fontSize: 28)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'yay!',
+                            style: GoogleFonts.fredoka(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFFE91E63),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Text('💗', style: TextStyle(fontSize: 28)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'She said YES!',
+                        style: GoogleFonts.fredoka(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF5C2D45),
+                          height: 1.1,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: const Color(0xFFFFB7D5).withValues(alpha: 0.6)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFE91E63).withValues(alpha: 0.08),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          _yesSweetMessage,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 17,
+                            height: 1.55,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF6B4A5A),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '(rules are rules 💅)',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                          color: const Color(0xFFB87A9A),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: Text(
+                                'Later',
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 2,
+                            child: FilledButton(
+                              onPressed: () async {
+                                Navigator.of(ctx).pop();
+                                if (!mounted) return;
+                                await _sendDecisionToWhatsApp('YES');
+                              },
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFFE91E63),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Text(
+                                'ماشي 💌',
+                                style: GoogleFonts.fredoka(fontSize: 17, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showNoWhatsAppPopup() async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Open WhatsApp?'),
+          content: const Text('Send your answer on WhatsApp when you tap below.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _sendDecisionToWhatsApp('NO');
+              },
+              child: const Text('ماشي'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -149,22 +327,13 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
                       ),
                       const SizedBox(height: 26),
                       if (_accepted)
-                        Column(
-                          children: [
-                            Text(
-                              'She said YES! ❤️',
-                              style: GoogleFonts.poppins(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w800,
-                                color: const Color(0xFFE91E63),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Best day of my life.',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                            ),
-                          ],
+                        Text(
+                          'She said YES! ❤️',
+                          style: GoogleFonts.fredoka(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFE91E63),
+                          ),
                         )
                       else
                         Stack(
@@ -176,7 +345,7 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
                                 ElevatedButton.icon(
                                   onPressed: () async {
                                     setState(() => _accepted = true);
-                                    await _sendDecisionToWhatsApp('YES');
+                                    await _showYesSweetPopup();
                                   },
                                   icon: const Icon(Icons.favorite),
                                   label: const Text('YES'),
@@ -197,7 +366,7 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
                                   child: OutlinedButton(
                                     onPressed: () async {
                                       _moveNoButton();
-                                      await _sendDecisionToWhatsApp('NO');
+                                      await _showNoWhatsAppPopup();
                                     },
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: const Color(0xFFE91E63),
