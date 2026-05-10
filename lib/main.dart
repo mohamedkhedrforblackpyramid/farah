@@ -257,6 +257,119 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
+    final wide = size.width > 720;
+
+    final card = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 30),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: const Color(0xFFE91E63).withValues(alpha: 0.22)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1FE91E63),
+            blurRadius: 30,
+            offset: Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.favorite_rounded, color: Color(0xFFE91E63), size: 52),
+          const SizedBox(height: 10),
+          Text(
+            'My Dearest Farah',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: wide ? 44 : 34,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF3A2433),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Every day with you feels like a beautiful dream I never want to wake up from.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: wide ? 19 : 16.5,
+              height: 1.45,
+              color: const Color(0xFF5C4150),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Will You Marry Me?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: wide ? 52 : 40,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFFE91E63),
+            ),
+          ),
+          const SizedBox(height: 24),
+          if (_accepted)
+            Text(
+              'She said YES! ❤️',
+              style: GoogleFonts.fredoka(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFFE91E63),
+              ),
+            )
+          else
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        setState(() => _accepted = true);
+                        await _showYesSweetPopup();
+                      },
+                      icon: const Icon(Icons.favorite),
+                      label: const Text('YES'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE91E63),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Transform.translate(
+                      offset: _noButtonOffset,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          _moveNoButton();
+                          await _showNoWhatsAppPopup();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFE91E63),
+                          side: const BorderSide(color: Color(0xFFE91E63), width: 1.6),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: const Text('NO'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
 
     return Scaffold(
       body: Stack(
@@ -273,125 +386,156 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
           ),
           Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
+              constraints: const BoxConstraints(maxWidth: 980),
               child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 30),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.84),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: const Color(0xFFE91E63).withValues(alpha: 0.25)),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x1FE91E63),
-                        blurRadius: 30,
-                        offset: Offset(0, 14),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.favorite_rounded, color: Color(0xFFE91E63), size: 56),
-                      const SizedBox(height: 12),
-                      Text(
-                        'My Dearest Farah',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: size.width > 600 ? 46 : 36,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFF3A2433),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Every day with you feels like a beautiful dream I never want to wake up from.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: size.width > 600 ? 20 : 17,
-                          height: 1.4,
-                          color: const Color(0xFF5C4150),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Will You Marry Me?',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: size.width > 600 ? 58 : 44,
-                          fontWeight: FontWeight.w900,
-                          color: const Color(0xFFE91E63),
-                        ),
-                      ),
-                      const SizedBox(height: 26),
-                      if (_accepted)
-                        Text(
-                          'She said YES! ❤️',
-                          style: GoogleFonts.fredoka(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFFE91E63),
-                          ),
-                        )
-                      else
-                        Stack(
-                          alignment: Alignment.center,
+                padding: EdgeInsets.fromLTRB(18, wide ? 28 : 12, 18, 20),
+                child: wide
+                    ? LayoutBuilder(
+                        builder: (context, constraints) {
+                          // IntrinsicHeight + Row + Expanded breaks layout (often empty on web).
+                          final heroHeight = math.min(
+                            540.0,
+                            math.max(300.0, constraints.maxHeight - 48),
+                          );
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                flex: 52,
+                                child: SizedBox(
+                                  height: heroHeight,
+                                  child: _ProposalGardenHero(t: _controller.value),
+                                ),
+                              ),
+                              const SizedBox(width: 22),
+                              Expanded(
+                                flex: 48,
+                                child: Center(child: card),
+                              ),
+                            ],
+                          );
+                        },
+                      )
+                    : SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () async {
-                                    setState(() => _accepted = true);
-                                    await _showYesSweetPopup();
-                                  },
-                                  icon: const Icon(Icons.favorite),
-                                  label: const Text('YES'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFE91E63),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                                    textStyle: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.4,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 20),
-                                Transform.translate(
-                                  offset: _noButtonOffset,
-                                  child: OutlinedButton(
-                                    onPressed: () async {
-                                      _moveNoButton();
-                                      await _showNoWhatsAppPopup();
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: const Color(0xFFE91E63),
-                                      side: const BorderSide(color: Color(0xFFE91E63), width: 1.6),
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                                      textStyle: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    child: const Text('NO'),
-                                  ),
-                                ),
-                              ],
+                            SizedBox(
+                              height: math.min(360.0, size.height * 0.38).clamp(220.0, 400.0).toDouble(),
+                              child: _ProposalGardenHero(t: _controller.value),
                             ),
+                            const SizedBox(height: 18),
+                            card,
                           ],
                         ),
-                    ],
-                  ),
-                ),
+                      ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Romantic hero frame: golden-hour gradient border, soft vignette, gentle parallax glow.
+class _ProposalGardenHero extends StatelessWidget {
+  const _ProposalGardenHero({required this.t});
+
+  final double t;
+
+  static const _asset = 'assets/proposal_garden.png';
+
+  @override
+  Widget build(BuildContext context) {
+    final breathe = 1.0 + 0.018 * math.sin(t * math.pi * 2);
+    final sway = 3.0 * math.sin(t * math.pi * 2 * 0.5);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Transform.translate(
+          offset: Offset(sway, 0),
+          child: Transform.scale(
+            scale: breathe,
+            alignment: Alignment.center,
+            child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFE91E63).withValues(alpha: 0.20 + 0.06 * math.sin(t * math.pi * 2)),
+                      blurRadius: 36,
+                      offset: const Offset(0, 18),
+                      spreadRadius: -2,
+                    ),
+                    BoxShadow(
+                      color: const Color(0xFFFFB74D).withValues(alpha: 0.18),
+                      blurRadius: 56,
+                      spreadRadius: -8,
+                    ),
+                  ],
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(3.2),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFFFFE082),
+                        const Color(0xFFE91E63).withValues(alpha: 0.95),
+                        const Color(0xFFFFCC80),
+                      ],
+                      stops: const [0.0, 0.5, 1.0],
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28.8),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(
+                          _asset,
+                          fit: BoxFit.cover,
+                          alignment: const Alignment(0, -0.08),
+                          filterQuality: FilterQuality.high,
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: Alignment.center,
+                              radius: 1.25,
+                              colors: [
+                                Colors.transparent,
+                                const Color(0xFF3E2723).withValues(alpha: 0.08),
+                              ],
+                              stops: const [0.55, 1.0],
+                            ),
+                          ),
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                const Color(0xFFFFFDE7).withValues(alpha: 0.12),
+                                Colors.transparent,
+                                const Color(0xFFFFF7FB).withValues(alpha: 0.92),
+                              ],
+                              stops: const [0.0, 0.42, 1.0],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        );
+      },
     );
   }
 }
