@@ -71,15 +71,22 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final wide = size.width > 720;
+    final compact = size.width < 380;
 
     final card = ClipRRect(
-      borderRadius: BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(28),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(
+          sigmaX: wide ? 18 : 14,
+          sigmaY: wide ? 18 : 14,
+        ),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 30),
+          padding: EdgeInsets.symmetric(
+            horizontal: wide ? 26 : (compact ? 18 : 22),
+            vertical: wide ? 30 : (compact ? 20 : 24),
+          ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(
               width: 1.5,
               color: Colors.white.withValues(alpha: 0.88),
@@ -116,33 +123,37 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.favorite_rounded, color: Color(0xFFE91E63), size: 52),
-              const SizedBox(height: 14),
+              Icon(
+                Icons.favorite_rounded,
+                color: const Color(0xFFE91E63),
+                size: wide ? 52 : (compact ? 40 : 46),
+              ),
+              SizedBox(height: compact ? 10 : 14),
               Text(
                 'Not surprised you said yes…',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.playfairDisplay(
-                  fontSize: wide ? 34 : 27,
+                  fontSize: wide ? 34 : (compact ? 22 : 26),
                   fontWeight: FontWeight.w700,
                   height: 1.28,
                   letterSpacing: wide ? -0.35 : -0.25,
                   color: const Color(0xFF3A2433),
                 ),
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: compact ? 10 : 14),
               Text(
                 'you seem like someone with great taste',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.playfairDisplay(
-                  fontSize: wide ? 26 : 21,
+                  fontSize: wide ? 26 : (compact ? 17 : 19.5),
                   fontWeight: FontWeight.w600,
-                  height: 1.4,
+                  height: compact ? 1.42 : 1.4,
                   letterSpacing: 0.25,
                   fontStyle: FontStyle.italic,
                   color: const Color(0xFF7D5266),
                 ),
               ),
-              const SizedBox(height: 22),
+              SizedBox(height: compact ? 16 : 22),
               Directionality(
                 textDirection: TextDirection.rtl,
                 child: ShaderMask(
@@ -162,10 +173,10 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
                     'بحبك',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.elMessiri(
-                      fontSize: wide ? 46 : 38,
+                      fontSize: wide ? 46 : (compact ? 34 : 40),
                       fontWeight: FontWeight.w700,
                       height: 1.05,
-                      letterSpacing: 6,
+                      letterSpacing: compact ? 3 : 6,
                       color: Colors.white,
                       shadows: const [
                         Shadow(
@@ -184,6 +195,8 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
       ),
     );
 
+    final padH = compact ? 14.0 : (wide ? 22.0 : 18.0);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -197,51 +210,71 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
               },
             ),
           ),
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 980),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(18, wide ? 28 : 12, 18, 20),
-                child: wide
-                    ? LayoutBuilder(
-                        builder: (context, constraints) {
-                          // IntrinsicHeight + Row + Expanded breaks layout (often empty on web).
-                          final heroHeight = math.min(
-                            540.0,
-                            math.max(300.0, constraints.maxHeight - 48),
-                          );
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                flex: 52,
-                                child: SizedBox(
-                                  height: heroHeight,
-                                  child: _ProposalGardenHero(t: _controller.value),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 980),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    padH,
+                    wide ? 24 : 8,
+                    padH,
+                    wide ? 24 : 16,
+                  ),
+                  child: wide
+                      ? LayoutBuilder(
+                          builder: (context, constraints) {
+                            final heroHeight = math.min(
+                              540.0,
+                              math.max(300.0, constraints.maxHeight - 48),
+                            );
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  flex: 52,
+                                  child: SizedBox(
+                                    height: heroHeight,
+                                    child: _ProposalGardenHero(t: _controller.value),
+                                  ),
                                 ),
+                                const SizedBox(width: 22),
+                                Expanded(
+                                  flex: 48,
+                                  child: Center(child: card),
+                                ),
+                              ],
+                            );
+                          },
+                        )
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            final heroH = (size.height * 0.28)
+                                .clamp(176.0, 292.0)
+                                .toDouble();
+                            return SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(
+                                parent: AlwaysScrollableScrollPhysics(),
                               ),
-                              const SizedBox(width: 22),
-                              Expanded(
-                                flex: 48,
-                                child: Center(child: card),
+                              clipBehavior: Clip.none,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  SizedBox(
+                                    height: heroH,
+                                    child: _ProposalGardenHero(t: _controller.value),
+                                  ),
+                                  SizedBox(height: compact ? 14 : 20),
+                                  card,
+                                  SizedBox(height: compact ? 12 : 20),
+                                ],
                               ),
-                            ],
-                          );
-                        },
-                      )
-                    : SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              height: math.min(360.0, size.height * 0.38).clamp(220.0, 400.0).toDouble(),
-                              child: _ProposalGardenHero(t: _controller.value),
-                            ),
-                            const SizedBox(height: 18),
-                            card,
-                          ],
+                            );
+                          },
                         ),
-                      ),
+                ),
               ),
             ),
           ),
