@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,7 +19,7 @@ class ProposalApp extends StatelessWidget {
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFFFFF7FB),
+      scaffoldBackgroundColor: const Color(0xFFFFFDF9),
     );
 
     return MaterialApp(
@@ -45,6 +46,16 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
 
   bool _accepted = false;
   Offset _noButtonOffset = Offset.zero;
+  bool _heroPrecached = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_heroPrecached) {
+      _heroPrecached = true;
+      precacheImage(const AssetImage('assets/proposal_garden.png'), context);
+    }
+  }
 
   @override
   void initState() {
@@ -259,23 +270,50 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
     final size = MediaQuery.sizeOf(context);
     final wide = size.width > 720;
 
-    final card = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 30),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: const Color(0xFFE91E63).withValues(alpha: 0.22)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1FE91E63),
-            blurRadius: 30,
-            offset: Offset(0, 14),
+    final card = ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 30),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              width: 1.5,
+              color: Colors.white.withValues(alpha: 0.88),
+            ),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.82),
+                const Color(0xFFFFF8FC).withValues(alpha: 0.66),
+                Colors.white.withValues(alpha: 0.58),
+              ],
+              stops: const [0.0, 0.42, 1.0],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.07),
+                blurRadius: 44,
+                offset: const Offset(0, 22),
+                spreadRadius: -6,
+              ),
+              BoxShadow(
+                color: const Color(0xFFE91E63).withValues(alpha: 0.13),
+                blurRadius: 38,
+                offset: const Offset(0, 14),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.55),
+                blurRadius: 0,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
           const Icon(Icons.favorite_rounded, color: Color(0xFFE91E63), size: 52),
           const SizedBox(height: 10),
           Text(
@@ -284,6 +322,8 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
             style: GoogleFonts.playfairDisplay(
               fontSize: wide ? 44 : 34,
               fontWeight: FontWeight.w900,
+              height: 1.08,
+              letterSpacing: wide ? -0.6 : -0.45,
               color: const Color(0xFF3A2433),
             ),
           ),
@@ -293,7 +333,8 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: wide ? 19 : 16.5,
-              height: 1.45,
+              height: 1.48,
+              letterSpacing: 0.15,
               color: const Color(0xFF5C4150),
               fontWeight: FontWeight.w500,
             ),
@@ -305,6 +346,8 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
             style: GoogleFonts.playfairDisplay(
               fontSize: wide ? 52 : 40,
               fontWeight: FontWeight.w900,
+              height: 1.06,
+              letterSpacing: wide ? -1.0 : -0.75,
               color: const Color(0xFFE91E63),
             ),
           ),
@@ -368,6 +411,8 @@ class _ProposalPageState extends State<ProposalPage> with SingleTickerProviderSt
               ],
             ),
         ],
+          ),
+        ),
       ),
     );
 
@@ -453,12 +498,22 @@ class _ProposalGardenHero extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Transform.translate(
-          offset: Offset(sway, 0),
-          child: Transform.scale(
-            scale: breathe,
-            alignment: Alignment.center,
-            child: Container(
+        final dpr = MediaQuery.devicePixelRatioOf(context);
+        const maxDecode = 4096;
+        final decodeW = constraints.hasBoundedWidth
+            ? (constraints.maxWidth * dpr).round().clamp(1, maxDecode)
+            : null;
+        final decodeH = constraints.hasBoundedHeight
+            ? (constraints.maxHeight * dpr).round().clamp(1, maxDecode)
+            : null;
+
+        return RepaintBoundary(
+          child: Transform.translate(
+            offset: Offset(sway, 0),
+            child: Transform.scale(
+              scale: breathe,
+              alignment: Alignment.center,
+              child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
@@ -491,6 +546,7 @@ class _ProposalGardenHero extends StatelessWidget {
                     ),
                   ),
                   child: ClipRRect(
+                    clipBehavior: Clip.antiAlias,
                     borderRadius: BorderRadius.circular(28.8),
                     child: Stack(
                       fit: StackFit.expand,
@@ -500,6 +556,10 @@ class _ProposalGardenHero extends StatelessWidget {
                           fit: BoxFit.cover,
                           alignment: const Alignment(0, -0.08),
                           filterQuality: FilterQuality.high,
+                          gaplessPlayback: true,
+                          isAntiAlias: true,
+                          cacheWidth: decodeW,
+                          cacheHeight: decodeH,
                         ),
                         DecoratedBox(
                           decoration: BoxDecoration(
@@ -534,6 +594,7 @@ class _ProposalGardenHero extends StatelessWidget {
                 ),
               ),
             ),
+          ),
         );
       },
     );
@@ -545,32 +606,169 @@ class _LoveBackgroundPainter extends CustomPainter {
 
   final double t;
 
+  static const _ivory = Color(0xFFFFFDF9);
+  static const _blush = Color(0xFFFFF5F8);
+  static const _roseMist = Color(0xFFF5E6EE);
+  static const _deepMauve = Color(0xFFE8D5E0);
+  static const _champagne = Color(0xFFE8D4A8);
+  static const _roseGold = Color(0xFFD4A5B9);
+
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
+    final w = size.width;
+    final h = size.height;
 
+    // Layer 1: Opulent wedding palette — ivory, blush, candlelit rose.
     final base = Paint()
       ..shader = const LinearGradient(
+        begin: Alignment(-0.85, -1),
+        end: Alignment(0.9, 1.15),
         colors: [
-          Color(0xFFFFF5FA),
-          Color(0xFFFFE7F2),
-          Color(0xFFFFF9FD),
+          _ivory,
+          Color(0xFFFFF9FB),
+          _blush,
+          _roseMist,
+          Color(0xFFF3E8EF),
         ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
+        stops: [0.0, 0.28, 0.55, 0.82, 1.0],
       ).createShader(rect);
     canvas.drawRect(rect, base);
 
-    final hearts = Paint()..style = PaintingStyle.fill;
-    for (var i = 0; i < 18; i++) {
-      final p = i / 18;
-      final x = size.width * (0.1 + ((i * 37) % 80) / 100);
-      final y = size.height * (0.95 - ((t + p) % 1.0) * 1.2);
-      final sway = math.sin((t * math.pi * 2) + p * 7) * 16;
-      final alpha = (0.15 + 0.2 * (1 - ((t + p) % 1.0))).clamp(0.08, 0.32);
-      hearts.color = const Color(0xFFE91E63).withValues(alpha: alpha);
-      _drawHeart(canvas, Offset(x + sway, y), 8 + (i % 5).toDouble() * 2, hearts);
+    // Layer 2: Soft cathedral spotlight from above.
+    final spotlight = Paint()
+      ..shader = RadialGradient(
+        center: const Alignment(0, -0.92),
+        focal: const Alignment(0, -0.55),
+        focalRadius: 0.08,
+        radius: 1.05,
+        colors: [
+          Colors.white.withValues(alpha: 0.58),
+          const Color(0xFFFFF8F2).withValues(alpha: 0.22),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.35, 1.0],
+      ).createShader(rect);
+    canvas.drawRect(rect, spotlight);
+
+    // Layer 3: Corner warmth (gold / rose vignette).
+    _radialCorner(canvas, w, h, Offset.zero, 0.65 * (w + h), [
+      _champagne.withValues(alpha: 0.34),
+      Colors.transparent,
+    ]);
+    _radialCorner(canvas, w, h, Offset(w, 0), 0.55 * (w + h), [
+      _roseGold.withValues(alpha: 0.22),
+      Colors.transparent,
+    ]);
+    _radialCorner(canvas, w, h, Offset(0, h), 0.5 * (w + h), [
+      const Color(0xFFC9A86C).withValues(alpha: 0.14),
+      Colors.transparent,
+    ]);
+    _radialCorner(canvas, w, h, Offset(w, h), 0.55 * (w + h), [
+      _deepMauve.withValues(alpha: 0.18),
+      Colors.transparent,
+    ]);
+
+    // Layer 4: Floating silk bokeh orbs (slow drift).
+    final tau = t * math.pi * 2;
+    final bokehCenters = <Offset>[
+      Offset(w * 0.12 + math.sin(tau * 0.7) * 14, h * 0.18),
+      Offset(w * 0.88 + math.cos(tau * 0.55) * 18, h * 0.22),
+      Offset(w * 0.42 + math.sin(tau * 0.9 + 1) * 22, h * 0.08),
+      Offset(w * 0.72, h * 0.42 + math.cos(tau * 0.65) * 26),
+      Offset(w * 0.22, h * 0.62 + math.sin(tau * 0.5) * 20),
+      Offset(w * 0.55 + math.cos(tau * 0.4) * 16, h * 0.78),
+      Offset(w * 0.92, h * 0.88 + math.sin(tau * 0.85) * 12),
+    ];
+    final bokehRadii = <double>[110, 95, 130, 85, 100, 115, 75];
+    for (var i = 0; i < bokehCenters.length; i++) {
+      final r = bokehRadii[i];
+      final orb = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Color.lerp(_champagne, Colors.white, 0.55)!.withValues(alpha: 0.26),
+            _roseGold.withValues(alpha: 0.08),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.45, 1.0],
+        ).createShader(Rect.fromCircle(center: bokehCenters[i], radius: r));
+      canvas.drawCircle(bokehCenters[i], r, orb);
     }
+
+    // Layer 5: Subtle horizontal silk bands.
+    final bandPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment(0, 0.35 + 0.08 * math.sin(tau)),
+        end: Alignment(1, 0.72 + 0.06 * math.cos(tau * 0.8)),
+        colors: [
+          Colors.white.withValues(alpha: 0.0),
+          Colors.white.withValues(alpha: 0.14),
+          Colors.white.withValues(alpha: 0.0),
+        ],
+        stops: const [0.0, 0.5, 1.0],
+      ).createShader(rect);
+    canvas.drawRect(rect, bandPaint);
+
+    // Layer 6: Twinkling crystal sparkles.
+    final sparklePaint = Paint();
+    for (var i = 0; i < 42; i++) {
+      final p = i / 42;
+      final sx = w * (0.05 + ((i * 47) % 90) / 100);
+      final sy = h * (0.08 + ((i * 73) % 84) / 100);
+      final tw = (0.5 + 0.5 * math.sin(tau * 3 + p * 12)).clamp(0.0, 1.0);
+      final a = (0.08 + 0.35 * tw) * (0.75 + 0.25 * math.sin(p * 6.28));
+      sparklePaint.color = Color.lerp(Colors.white, _champagne, 0.35)!.withValues(alpha: a);
+      final sz = 1.2 + (i % 4) * 0.65;
+      canvas.drawCircle(Offset(sx, sy), sz, sparklePaint);
+      if (tw > 0.72) {
+        _drawFourRaySparkle(canvas, Offset(sx, sy), sz * 2.8, sparklePaint.color.withValues(alpha: a * 0.55));
+      }
+    }
+
+    // Layer 7: Delicate floating hearts — fewer, softer, mixed rose & gold.
+    final heartPaint = Paint()..style = PaintingStyle.fill;
+    for (var i = 0; i < 14; i++) {
+      final p = i / 14;
+      final x = w * (0.08 + ((i * 41) % 84) / 100);
+      final y = h * (1.05 - ((t + p) % 1.0) * 1.15);
+      final sway = math.sin((t * math.pi * 2) + p * 6.5) * 12;
+      final alpha = (0.06 + 0.14 * (1 - ((t + p) % 1.0))).clamp(0.05, 0.22);
+      final hueBlend = i.isEven ? _roseGold : const Color(0xFFE91E63);
+      heartPaint.color = hueBlend.withValues(alpha: alpha);
+      _drawHeart(canvas, Offset(x + sway, y), 7 + (i % 4).toDouble() * 1.8, heartPaint);
+    }
+
+    // Layer 8: Fine pearl vignette frame (inner glow).
+    final frame = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.black.withValues(alpha: 0.03),
+          Colors.transparent,
+          Colors.transparent,
+          _deepMauve.withValues(alpha: 0.06),
+        ],
+        stops: const [0.0, 0.22, 0.78, 1.0],
+      ).createShader(rect);
+    canvas.drawRect(rect, frame);
+  }
+
+  void _radialCorner(Canvas canvas, double w, double h, Offset center, double radius, List<Color> colors) {
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: colors,
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), paint);
+  }
+
+  void _drawFourRaySparkle(Canvas canvas, Offset c, double r, Color color) {
+    final p = Paint()
+      ..color = color
+      ..strokeWidth = 1.1
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(Offset(c.dx - r, c.dy), Offset(c.dx + r, c.dy), p);
+    canvas.drawLine(Offset(c.dx, c.dy - r), Offset(c.dx, c.dy + r), p);
   }
 
   void _drawHeart(Canvas canvas, Offset center, double s, Paint paint) {
