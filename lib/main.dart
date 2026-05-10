@@ -725,17 +725,102 @@ class _LoveBackgroundPainter extends CustomPainter {
       }
     }
 
-    // Layer 7: Delicate floating hearts — fewer, softer, mixed rose & gold.
+    // Layer 7: Shower of hearts — dense field, varied drift, sway & gentle spin.
     final heartPaint = Paint()..style = PaintingStyle.fill;
-    for (var i = 0; i < 14; i++) {
-      final p = i / 14;
-      final x = w * (0.08 + ((i * 41) % 84) / 100);
-      final y = h * (1.05 - ((t + p) % 1.0) * 1.15);
-      final sway = math.sin((t * math.pi * 2) + p * 6.5) * 12;
-      final alpha = (0.06 + 0.14 * (1 - ((t + p) % 1.0))).clamp(0.05, 0.22);
-      final hueBlend = i.isEven ? _roseGold : const Color(0xFFE91E63);
-      heartPaint.color = hueBlend.withValues(alpha: alpha);
-      _drawHeart(canvas, Offset(x + sway, y), 7 + (i % 4).toDouble() * 1.8, heartPaint);
+    final heartCount = (w * h / 3800).floor().clamp(85, 220);
+    for (var i = 0; i < heartCount; i++) {
+      final p = i / heartCount;
+      final seed = i * 0.813 + w * 0.00017;
+      final gx = (math.sin(seed * 12.9898) * 43758.5453 % 1).abs();
+      final gy = (math.sin(seed * 78.233 + 2.1) * 23421.123 % 1).abs();
+      final baseX = w * (0.03 + gx * 0.94);
+      final riseSpeed = 0.22 + (i % 13) * 0.028;
+      final phase = p * 5.7 + seed;
+      final rise = (t * riseSpeed + phase + gy * 0.45) % 1.0;
+      final baseY = h * (1.12 - rise * 1.35);
+      final sway = math.sin(tau * (0.55 + (i % 9) * 0.07) + seed * 6.2) * (16 + (i % 7) * 2.5);
+      final bob = math.cos(tau * (0.85 + (i % 5) * 0.05) + seed) * (9 + (i % 4));
+      final wander = math.sin(tau * 0.35 + i * 0.31) * (w * 0.018);
+      final x = baseX + sway + wander;
+      final y = baseY + bob;
+      final s = 4.2 + (i % 11) * 1.35 + (i % 3) * 0.4;
+      final pulse = 0.55 + 0.45 * math.sin(tau * 1.4 + seed * 4);
+      final alpha = (0.055 + 0.17 * pulse * (0.75 + 0.25 * math.sin(seed * 10))).clamp(0.045, 0.32);
+      final tone = i % 5;
+      final baseColor = switch (tone) {
+        0 || 4 => const Color(0xFFE91E63),
+        1 => _roseGold,
+        2 => const Color(0xFFF06292),
+        _ => const Color(0xFFE57373),
+      };
+      heartPaint.color = baseColor.withValues(alpha: alpha);
+      final wobble = 0.18 * math.sin(tau * 0.65 + seed * 2.6);
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(wobble);
+      _drawHeart(canvas, Offset.zero, s, heartPaint);
+      canvas.restore();
+    }
+
+    // Layer 7b: "Farah" — many elegant names drifting, swaying, and spinning across the canvas.
+    final nameCount = (w * h / 4600).floor().clamp(32, 96);
+    for (var i = 0; i < nameCount; i++) {
+      final seed = i * 1.127 + w * 0.00019 + h * 0.00011;
+      final gx = (math.sin(seed * 9.12) * 43758.5453 % 1 + 1) % 1;
+      final gy = (math.sin(seed * 5.47 + 1.73) * 23421.123 % 1 + 1) % 1;
+      final baseX = w * (0.02 + gx * 0.96);
+      final riseSpeed = 0.13 + (i % 15) * 0.019;
+      final phase = i * 0.41 + seed * 1.7;
+      final rise = (t * riseSpeed + phase + gy * 0.62) % 1.0;
+      final baseY = h * (1.1 - rise * 1.42);
+      final sway = math.sin(tau * (0.52 + (i % 10) * 0.055) + seed * 4.9) * (24 + (i % 8) * 2.8);
+      final lift = math.cos(tau * (0.68 + (i % 6) * 0.045) + seed * 2.4) * (12 + (i % 5));
+      final drift = math.cos(tau * 0.26 + i * 0.52) * (w * 0.042);
+      final slow = math.sin(tau * 0.18 + seed * 1.1) * (h * 0.025);
+      final x = baseX + sway + drift;
+      final y = baseY + lift + slow;
+      final fs = 11.5 + (i % 15) * 1.45;
+      final pulse = 0.42 + 0.58 * math.sin(tau * 1.15 + seed * 6);
+      final alpha = (0.08 + 0.24 * pulse).clamp(0.07, 0.42);
+      final tone = i % 4;
+      final nameColor = switch (tone) {
+        0 => const Color(0xFFE91E63),
+        1 => const Color(0xFFC48B9C),
+        2 => const Color(0xFFAD6B7F),
+        _ => const Color(0xFFE573A5),
+      };
+      final label = TextPainter(
+        text: TextSpan(
+          text: 'Farah',
+          style: GoogleFonts.playfairDisplay(
+            fontSize: fs,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.8,
+            height: 1.0,
+            color: nameColor.withValues(alpha: alpha),
+            shadows: [
+              Shadow(
+                blurRadius: 10,
+                color: Colors.white.withValues(alpha: alpha * 0.5),
+                offset: const Offset(0, 1.2),
+              ),
+              Shadow(
+                blurRadius: 4,
+                color: const Color(0xFFE91E63).withValues(alpha: alpha * 0.28),
+                offset: Offset.zero,
+              ),
+            ],
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+        textScaler: TextScaler.noScaling,
+      )..layout();
+      final rot = 0.28 * math.sin(tau * 0.5 + seed * 2.2);
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(rot);
+      label.paint(canvas, Offset(-label.width / 2, -label.height / 2));
+      canvas.restore();
     }
 
     // Layer 8: Fine pearl vignette frame (inner glow).
